@@ -1,0 +1,84 @@
+========================================
+ALGOWAR FAVICON SETUP INSTRUCTIONS
+========================================
+
+CURRENT STATUS:
+✅ HTML is configured to use /static/fav.png
+✅ Fallback SVG favicon is embedded (shows lantern with {} code brackets)
+⚠️  You need to add fav.png file to this folder
+
+========================================
+HOW TO ADD YOUR FAVICON:
+========================================
+
+1. Create or download a favicon image
+2. Name it exactly: fav.png
+3. Place it in this folder (static/)
+4. Restart your Flask server
+5. Hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)
+
+========================================
+RECOMMENDED SPECIFICATIONS:
+========================================
+
+Format: PNG with transparency
+Size: 32x32 pixels (or 64x64, 128x128)
+Theme: Tokyo Night Cyberpunk + Traditional Japanese
+
+========================================
+DESIGN IDEAS:
+========================================
+
+Option 1: Japanese Lantern (RECOMMENDED)
+- Rounded lantern shape with warm golden glow
+- Neon cyan outline
+- Simple and recognizable
+
+Option 2: Code Brackets
+- Stylized { } brackets
+- Neon cyan and magenta colors
+- Represents coding battle
+
+Option 3: Kanji Character
+- 戦 (battle) or 闘 (fight)
+- Bold with neon glow effect
+
+Option 4: Tournament Bracket
+- Minimalist bracket tree icon
+- Neon cyan lines
+
+========================================
+COLOR PALETTE:
+========================================
+
+Neon Cyan:    #00E5FF (primary tech color)
+Neon Gold:    #FFB703 (lantern/traditional)
+Neon Magenta: #FF2E63 (energy/battle)
+Dark BG:      #0B0F1A (Tokyo night)
+
+========================================
+QUICK ONLINE TOOLS TO CREATE FAVICON:
+========================================
+
+1. Favicon.io - https://favicon.io/
+2. Canva - https://www.canva.com/
+3. RealFaviconGenerator - https://realfavicongenerator.net/
+4. Figma - https://www.figma.com/
+
+========================================
+TESTING:
+========================================
+
+After adding fav.png:
+1. Restart Flask server
+2. Clear browser cache (Ctrl+Shift+Delete)
+3. Hard refresh (Ctrl+Shift+R)
+4. Check browser tab for favicon
+
+If still not visible:
+- Check file name is exactly "fav.png" (lowercase)
+- Check file is in static/ folder
+- Check browser console for 404 errors
+- Try incognito/private browsing mode
+
+========================================

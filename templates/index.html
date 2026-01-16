@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALGOWAR - アルゴリズム決闘</title>
+    
+    <!-- Favicon - Multiple formats for browser compatibility -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/fav.png?v=1">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/fav.png?v=1">
+    <link rel="shortcut icon" href="/static/fav.png?v=1">
+    <link rel="apple-touch-icon" href="/static/fav.png?v=1">
+    <!-- Fallback SVG favicon if PNG not found -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2300E5FF;stop-opacity:1'/%3E%3Cstop offset='100%25' style='stop-color:%23FFB703;stop-opacity:1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='%230B0F1A'/%3E%3Cpath d='M30 20 L70 20 Q75 20 75 25 L75 55 Q75 60 70 60 L30 60 Q25 60 25 55 L25 25 Q25 20 30 20 Z' fill='url(%23g)' opacity='0.9'/%3E%3Cellipse cx='50' cy='70' rx='8' ry='12' fill='%23FFB703' opacity='0.8'/%3E%3Ctext x='50' y='45' font-family='monospace' font-size='24' font-weight='bold' fill='%230B0F1A' text-anchor='middle'%3E%7B%7D%3C/text%3E%3C/svg%3E">
+    
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <style>
@@ -1206,6 +1215,30 @@
             animation: toastSlideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
+        /* Monaco Editor Smooth Scrolling */
+        #editor {
+            scroll-behavior: smooth !important;
+            overflow: auto !important;
+        }
+        
+        /* Ensure Monaco editor container allows page scrolling */
+        #editor .monaco-editor,
+        #editor .monaco-editor .overflow-guard,
+        #editor .monaco-scrollable-element {
+            scroll-behavior: smooth !important;
+        }
+        
+        /* Custom scrollbar for Monaco editor */
+        #editor .monaco-scrollable-element > .scrollbar > .slider {
+            background: rgba(0, 229, 255, 0.5) !important;
+            border-radius: 4px !important;
+            transition: background 0.3s ease !important;
+        }
+        
+        #editor .monaco-scrollable-element > .scrollbar > .slider:hover {
+            background: rgba(0, 229, 255, 0.8) !important;
+        }
+
         @keyframes emergencyPulse {
             0%, 100% { 
                 box-shadow: var(--glow-lantern);
@@ -2339,7 +2372,7 @@
         </div>
 
         <!-- Emergency Host Control Button (Always visible for hosts) -->
-        <div id="emergencyHostBtn" class="emergency-host-btn hidden" onclick="toggleHostControlPanel()">
+        <div id="emergencyHostBtn" class="emergency-host-btn hidden">
             🎛️
         </div>
         
@@ -2446,7 +2479,7 @@
                 </div>
 
                 <!-- Split Screen Content -->
-                <div style="flex: 1; display: flex; height: calc(100vh - 180px); min-height: 600px; overflow-y: auto; scroll-behavior: smooth;">
+                <div style="flex: 1; display: flex; overflow-y: auto; scroll-behavior: smooth;">
                     <!-- Left Panel - Problem Description -->
                     <div style="width: 50%; background: var(--bg-secondary); border-right: 2px solid rgba(0, 229, 255, 0.3);">
                         <div style="padding: 30px;">
@@ -2504,7 +2537,7 @@
                         </div>
 
                         <!-- Monaco Editor -->
-                        <div id="editor" style="height: 500px; min-height: 500px; flex-shrink: 0;"></div>
+                        <div id="editor" style="height: 500px; min-height: 500px; flex-shrink: 0; scroll-behavior: smooth; overflow: auto;"></div>
 
                         <!-- Test Section -->
                         <div style="background: var(--bg-glass); backdrop-filter: blur(25px); border-top: 1px solid rgba(0, 229, 255, 0.3); padding: 20px;">
@@ -2636,6 +2669,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             showView('loadingView');
             
+            // Add event listener for emergency host button
+            const emergencyBtn = document.getElementById('emergencyHostBtn');
+            if (emergencyBtn) {
+                emergencyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleHostControlPanel();
+                });
+            }
+            
             // Shorter fallback timeout
             setTimeout(() => {
                 const currentView = document.querySelector('.container > div:not(.hidden)');
@@ -2663,14 +2706,6 @@
                 }
             });
         });
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden && isHost) {
-                    setTimeout(() => {
-                        showHostControlPanel();
-                    }, 100);
-                }
-            });
-        
 
         // Timer Functions
         function updateTimerDisplay(remaining, total, easierQuestion = false) {
@@ -2808,13 +2843,12 @@
             
             // NEVER hide host control panel for hosts - keep it always visible
             if (isHost) {
-                // Check if panel should be visible (not manually hidden by user)
                 const panel = document.getElementById('hostControlPanel');
-                if (panel && !panel.classList.contains('hidden')) {
-                    // Panel is already visible, don't touch it to prevent flickering
-                } else if (panel && panel.classList.contains('host-panel-persistent')) {
-                    // Panel should be persistent, show it
-                    panel.classList.remove('hidden');
+                if (panel) {
+                    // If panel has persistent class or is currently visible, keep it visible
+                    if (panel.classList.contains('host-panel-persistent') || !panel.classList.contains('hidden')) {
+                        panel.classList.remove('hidden');
+                    }
                 }
             } else {
                 hideHostControlPanel();
@@ -3174,12 +3208,19 @@
                 }
             }
             
-            // Store bracket structure for real-time updates
-            window.bracketStructure = {
-                rounds: rounds,
-                playerCount: playerCount,
-                matches: {}
-            };
+            // Only initialize bracket structure if it doesn't exist
+            // This preserves match data when regenerating the bracket
+            if (!window.bracketStructure || !window.bracketStructure.matches) {
+                window.bracketStructure = {
+                    rounds: rounds,
+                    playerCount: playerCount,
+                    matches: {}
+                };
+            } else {
+                // Update metadata but keep matches
+                window.bracketStructure.rounds = rounds;
+                window.bracketStructure.playerCount = playerCount;
+            }
             
             // Create bracket structure
             let currentRoundPlayers = [...players];
@@ -3216,25 +3257,33 @@
                     const player1Index = match * 2;
                     const player2Index = match * 2 + 1;
                     
-                    // For first round, show actual player names
-                    // For later rounds, show "?" until determined
-                    let player1, player2;
-                    if (round === 1) {
-                        player1 = currentRoundPlayers[player1Index] || 'BYE';
-                        player2 = currentRoundPlayers[player2Index] || 'BYE';
-                    } else {
-                        player1 = '?';
-                        player2 = '?';
-                    }
+                    const matchKey = `r${round}-m${match}`;
                     
-                    // Store match info
-                    window.bracketStructure.matches[`r${round}-m${match}`] = {
-                        round: round,
-                        match: match,
-                        player1: player1,
-                        player2: player2,
-                        winner: null
-                    };
+                    // Check if match data already exists (preserve it)
+                    let player1, player2;
+                    if (window.bracketStructure.matches[matchKey]) {
+                        // Use existing data
+                        player1 = window.bracketStructure.matches[matchKey].player1;
+                        player2 = window.bracketStructure.matches[matchKey].player2;
+                    } else {
+                        // Initialize new match
+                        if (round === 1) {
+                            player1 = currentRoundPlayers[player1Index] || 'BYE';
+                            player2 = currentRoundPlayers[player2Index] || 'BYE';
+                        } else {
+                            player1 = '?';
+                            player2 = '?';
+                        }
+                        
+                        // Store new match info
+                        window.bracketStructure.matches[matchKey] = {
+                            round: round,
+                            match: match,
+                            player1: player1,
+                            player2: player2,
+                            winner: null
+                        };
+                    }
                     
                     // Determine winner placeholder for next round
                     nextRoundPlayers.push('?');
@@ -3295,11 +3344,11 @@
                 return;
             }
             
-            // Check if tournament is complete
-            const isTournamentComplete = tournamentData.currentView === 'tournamentCompleteView';
+            // Check if tournament is complete - check if champion exists, not just the view
+            const isTournamentComplete = window.tournamentChampion && window.tournamentChampion !== '?';
             
             // Restore champion name if tournament is complete
-            if (isTournamentComplete && window.tournamentChampion) {
+            if (isTournamentComplete) {
                 const bracketChampionEl = document.getElementById('bracketChampionName');
                 if (bracketChampionEl) {
                     bracketChampionEl.textContent = window.tournamentChampion;
@@ -3417,47 +3466,35 @@
                 winner: winner
             };
             
-            // Update player names in DOM
+            // Update player names in DOM (NO styling during tournament)
             const player1Div = matchDiv.querySelector('[data-player="1"]');
             const player2Div = matchDiv.querySelector('[data-player="2"]');
             
             if (player1Div) {
                 player1Div.textContent = player1 || '?';
-                player1Div.classList.remove('unknown', 'winner', 'loser');
+                player1Div.classList.remove('unknown');
                 if (player1 === '?') {
                     player1Div.classList.add('unknown');
-                } else if (winner && winner === player1) {
-                    player1Div.classList.add('winner');
-                } else if (winner && winner !== player1) {
-                    player1Div.classList.add('loser');
                 }
+                // DO NOT apply winner/loser styling here - only after tournament ends
             }
             
             if (player2Div) {
                 player2Div.textContent = player2 || '?';
-                player2Div.classList.remove('unknown', 'winner', 'loser');
+                player2Div.classList.remove('unknown');
                 if (player2 === '?') {
                     player2Div.classList.add('unknown');
-                } else if (winner && winner === player2) {
-                    player2Div.classList.add('winner');
-                } else if (winner && winner !== player2) {
-                    player2Div.classList.add('loser');
                 }
+                // DO NOT apply winner/loser styling here - only after tournament ends
             }
             
-            // Update match styling
+            // Update next round with winner (but no styling)
             if (winner) {
-                matchDiv.classList.add('winner');
-                matchDiv.classList.remove('active');
-                
-                // Update next round with winner
                 const nextRound = round + 1;
                 const nextMatch = Math.floor(match / 2);
                 const nextPlayerSlot = match % 2 === 0 ? 1 : 2;
                 
                 updateBracketNextRound(nextRound, nextMatch, nextPlayerSlot, winner);
-            } else {
-                matchDiv.classList.add('active');
             }
         }
         
@@ -3659,6 +3696,7 @@
                 // Update button appearance
                 if (btn) {
                     btn.style.background = 'var(--neon-cyan)';
+                    btn.style.borderColor = 'var(--neon-cyan)';
                 }
             } else {
                 // Hide panel
@@ -3669,6 +3707,7 @@
                 // Reset button appearance
                 if (btn) {
                     btn.style.background = 'var(--neon-gold)';
+                    btn.style.borderColor = 'var(--lantern-warm)';
                 }
             }
         }
@@ -3826,11 +3865,26 @@
                 info: 'ℹ️'
             };
             
-            toast.innerHTML = `
-                <div class="toast-icon">${icons[type] || icons.info}</div>
-                <div class="toast-content">${message}</div>
-                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-            `;
+            // Create toast structure
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'toast-icon';
+            iconDiv.textContent = icons[type] || icons.info;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'toast-content';
+            contentDiv.innerHTML = message;
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'toast-close';
+            closeBtn.textContent = '×';
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toast.remove();
+            });
+            
+            toast.appendChild(iconDiv);
+            toast.appendChild(contentDiv);
+            toast.appendChild(closeBtn);
             
             container.appendChild(toast);
             
@@ -3914,8 +3968,28 @@
                     cursorStyle: 'line',
                     wordWrap: 'on',
                     tabSize: 4,
-                    insertSpaces: true
+                    insertSpaces: true,
+                    // Enable smooth scrolling with spline animation
+                    smoothScrolling: true,
+                    mouseWheelScrollSensitivity: 1,
+                    fastScrollSensitivity: 5,
+                    scrollbar: {
+                        vertical: 'visible',
+                        horizontal: 'visible',
+                        useShadows: true,
+                        verticalHasArrows: false,
+                        horizontalHasArrows: false,
+                        verticalScrollbarSize: 10,
+                        horizontalScrollbarSize: 10,
+                        arrowSize: 30
+                    }
                 });
+                
+                // Enable smooth scrolling for the editor container
+                const editorElement = document.getElementById('editor');
+                if (editorElement) {
+                    editorElement.style.scrollBehavior = 'smooth';
+                }
                 
                 // Set initial template based on problem
                 setTimeout(() => {
